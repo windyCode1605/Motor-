@@ -42,6 +42,7 @@ const handleRegister = () => {
   navigation.navigate("RegisterScreen", {Contract : item});
 }
 // tong tien
+// kk
 const totalAmount = Contracts.reduce((sum, contract) =>  sum + contract.Mount, 0);
 // format Numb
 const formatNumber = (num) => {
