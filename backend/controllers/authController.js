@@ -18,11 +18,9 @@ exports.login = async (req, res) => {
         );
 
         if (results.length === 0) {
-            return res
-                .status(401)
-                .json({
-                    message: "Tài khoản không tìm thấy hoặc không hoạt động",
-                });
+            return res.status(401).json({
+                message: "Tài khoản không tìm thấy hoặc không hoạt động",
+            });
         }
 
         const account = results[0];

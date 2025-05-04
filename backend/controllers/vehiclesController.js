@@ -76,12 +76,9 @@ exports.createVehicle = (req, res) => {
     db.query(sql, values, (err, results) => {
         if (err) {
             if (err.code === "ER_DUP_ENTRY") {
-                return res
-                    .status(409)
-                    .json({
-                        message:
-                            "Mã barcode này đã tồn tại, vui lòng chọn mã khác",
-                    });
+                return res.status(409).json({
+                    message: "Mã barcode này đã tồn tại, vui lòng chọn mã khác",
+                });
             }
             console.error("Lỗi thêm xe:", err);
             return res.status(500).json({ message: "Thêm xe thất bại" });

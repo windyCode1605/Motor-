@@ -15,12 +15,9 @@ exports.getAllCustomers = async (req, res) => {
 exports.getCustomerByAccountId = (req, res) => {
     const { account_id } = req.user.account_id; // Lấy account_id từ token đã xác thực
     if (!account_id) {
-        return res
-            .status(400)
-            .json({
-                message:
-                    "Không tìm thấy account_id để lấy thông tin khách hàng",
-            });
+        return res.status(400).json({
+            message: "Không tìm thấy account_id để lấy thông tin khách hàng",
+        });
     }
     const sql = "SELECT * FROM customers WHERE account_id = ?";
 
