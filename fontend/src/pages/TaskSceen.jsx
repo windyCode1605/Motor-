@@ -1,12 +1,18 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity ,Image} from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import React, { useState } from 'react';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
+const BookingScreen = ({ route }) => {
+  const { motorcycle } = route.params;
+  const navigation = useNavigation();
+  const [position, setPosition] = useState('');
+  const [fuel, setFuel] = useState('');
 
+  const handleBooking = () => {
+    // Gửi dữ liệu đặt xe đến backend (sẽ xử lý ở phần backend)
+    navigation.navigate('Payment', { motorcycle, position, fuel });
+  };
 
-
-
-const TaskScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
           <TouchableOpacity style={[styles.option,{margin: 10, borderRadius: 50,borderTopColor: "#ddd", borderTopWidth: 1,height: 70,}]}>

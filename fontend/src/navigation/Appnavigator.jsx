@@ -6,7 +6,7 @@ import LoginScreen from "../pages/LoginScreen";
 import RegisterScreen from "../pages/RegisterScreen";
 import TaskScreen from "../pages/TaskScreen";
 import WarningScreen from "../pages/WarningScreen";
-import HoiSo from "../pages/HoiSo";
+import HoiSo from "../Hoiso";
 
 
 import AllContract from "../pages/ContractDate/AllContract";
