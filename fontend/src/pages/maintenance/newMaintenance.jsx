@@ -1,3 +1,4 @@
+{/**Buoc 2 */}
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -21,25 +22,42 @@ const newMaintenance = ({ navigation }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [staffList, setStaffList] = useState([]);
   const [selectedStaffId, setSelectedStaffId] = useState('');
+  const [motorList, setMotorList] = useState([]);
+  const [selectedMotorId, setSelectedMotorId] = useState('');
+  const [note, setNote] = useState('');
 
 
   useEffect(() => {
-    const fetchStaff = async () => {
-      const token = await AsyncStorage.getItem('token');
-      try {
-        const res = await axios.get(`${BASE_URL}/Receptionist/Receptionist`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setStaffList(res.data);
-      } catch (error) {
-        console.log("Lỗi khi lấy danh sách nhân viên : ", error.message);
-        console.error("Chi tiết lỗi:", error.res || error);
-      }
-    };
+    fetchVehicles();
     fetchStaff();
   }, [])
+  const fetchStaff = async () => {
+    const token = await AsyncStorage.getItem('token');
+    try {
+      const res = await axios.get(`${BASE_URL}/Receptionist/Receptionist`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setStaffList(res.data);
+    } catch (error) {
+      console.log("Lỗi khi lấy danh sách nhân viên : ", error.message);
+      console.error("Chi tiết lỗi:", error.res || error);
+    }
+  };
+  const fetchVehicles = async () => {
+    const token = await AsyncStorage.getItem('token');
+    try {
+      const res = await axios.get(`${BASE_URL}/vehicles`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setMotorList(res.data);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách xe: ", error.message);
+    }
+  }
 
   const validateDates = (newStart, newEnd) => {
     if (newStart > newEnd) {
@@ -50,6 +68,7 @@ const newMaintenance = ({ navigation }) => {
       return true;
     }
   };
+
 
   const showDatePicker = (type) => {
     const current = type === 'start' ? startDate : endDate;
@@ -78,15 +97,25 @@ const newMaintenance = ({ navigation }) => {
 
   const handleNext = () => {
     if (!validateDates(startDate, endDate)) return;
-    // Điều hướng tiếp theo nếu hợp lệ
-    navigation.navigate('nextStep');
+    if (!selectedMotorId) {
+      setErrorMessage('Vui lòng chọn xe.');
+      return;
+    }
+    setErrorMessage('');
+    navigation.navigate('serviceForm', {
+      selectedMotorId,
+      selectedStaffId,
+      startDate,
+      endDate,
+      note,
+    });
   };
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate('maintenance')}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-left" size={28} />
         </TouchableOpacity>
         <Text style={styles.title}>Thêm mới phiếu sửa chữa</Text>
@@ -103,8 +132,21 @@ const newMaintenance = ({ navigation }) => {
             Chọn xe <Text style={styles.required}>*</Text>
           </Text>
           <View style={styles.inputContainer}>
-            <Picker style={styles.picker}>
-              <Picker.Item label="HJsjss - 496494646" value="HJsjss - 496494646" />
+            <Picker
+              selectedValue={selectedMotorId}
+              onValueChange={(value) => setSelectedMotorId(value)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Chọn xe" value="" />
+              {
+                motorList.map((motor) => (
+                  <Picker.Item
+                    key={motor.car_id}
+                    label={`${motor.model} - ${motor.license_plate}`}
+                    value={motor.car_id}
+                  />
+                ))
+              }
             </Picker>
           </View>
         </View>
@@ -159,21 +201,21 @@ const newMaintenance = ({ navigation }) => {
         {/* Ghi chú */}
         <View style={styles.formGroup}>
           <Text style={styles.label}>Ghi chú</Text>
-          <TextInput style={styles.input} placeholder="Nhập ghi chú" />
+          <TextInput style={styles.input} placeholder="Nhập ghi chú" onChangeText={setNote} />
         </View>
 
         {/* Nút hành động */}
         <View style={styles.formButtons}>
-          <TouchableOpacity style={styles.cancelButton}>
+          <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
             <Text style={styles.cancelButtonText}>Hủy</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[
               styles.nextButton,
-              errorMessage && { backgroundColor: '#ccc' },
+              (errorMessage || !selectedMotorId) && { backgroundColor: '#ccc' },
             ]}
             onPress={handleNext}
-            disabled={!!errorMessage}
+            disabled={!selectedMotorId || !!errorMessage}
           >
             <Text style={styles.nextButtonText}>Tiếp theo</Text>
           </TouchableOpacity>
@@ -213,7 +255,7 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 40,
-    borderBottomWidth : 5,
+    borderBottomWidth: 5,
     ...Platform.select({
       ios: { height: 120 },
       android: { height: 50 },
