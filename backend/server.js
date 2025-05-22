@@ -18,6 +18,7 @@ const momoRoutes         = require('./Routes/paymentRoute');
 const contractRoute      = require('./Routes/contractRoute');
 const maintenanceRoute   = require('./Routes/maintenanceRoute');
 const receptionistRoutes = require('./Routes/receptionistRoute');
+const serviceRoute       = require('./Routes/serviceRoute');
 
 // MIDDLEWARE
 const authenticateToken  = require('./middleware/authMiddleware');
@@ -33,7 +34,7 @@ app.use('/reservation', authenticateToken, reservationRoutes);
 app.use('/payment', authenticateToken, momoRoutes);
 
 // VEHICLE ROUTES — Phân quyền rõ ràng
-app.use('/', vehicleRoutes); // chỉ admin mới được thao tác
+app.use('/' ,vehicleRoutes); 
 
 // CONTRACT ROUTES — Phân quyền rõ ràng
 app.use('/contracts', contractRoute);
@@ -42,6 +43,9 @@ app.use('/contracts', contractRoute);
 app.use('/maintenance', authenticateToken, authorizeRoles('admin', 'staff'), maintenanceRoute);
 //Receptionistmaintenance
 app.use('/Receptionist', authenticateToken, authorizeRoles('admin'), receptionistRoutes);
+
+app.use('/services', authenticateToken, authorizeRoles('admin'), serviceRoute);
+
 // SERVER
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
