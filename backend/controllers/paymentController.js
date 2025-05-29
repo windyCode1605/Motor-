@@ -48,7 +48,7 @@ exports.createMoMoPayment = async (req, res) => {
     console.log("--------------------SIGNATURE----------------")
     console.log(signature)
 
-    //json object send to MoMo endpoint
+   
     const requestBody = JSON.stringify({
       partnerCode: partnerCode,
       partnerName: "Test",
@@ -135,7 +135,6 @@ exports.handleMomoIPN = async (req, res) => {
   }
 }
 
-// Cập nhật trạng thái thanh toán
 exports.updatePaymentStatus = async (req, res) => {
   const { orderId, status } = req.body;
 
