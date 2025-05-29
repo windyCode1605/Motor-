@@ -1,8 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const ReceptionistController = require('../controllers/receptionistController');
+const receptionistController = require('../controllers/receptionistController');
 
 
-router.get('/Receptionist', ReceptionistController.getReceptionists);
+
+router.get('/receptionist', receptionistController.getReceptionists);
+
+
+
+router.post('/receptionist', receptionistController.createReceptionist);
+
+
+router.put('/receptionist/:id', receptionistController.updateReceptionist);
+
+
+router.delete('/receptionist/:id', receptionistController.deleteReceptionist);
 
 module.exports = router;
