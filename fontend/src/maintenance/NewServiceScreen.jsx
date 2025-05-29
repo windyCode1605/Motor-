@@ -1,4 +1,4 @@
-{/**Buoc 4 */}
+{/**Buoc 4 */ }
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert
@@ -7,12 +7,11 @@ import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import { BASE_URL } from '@env';
-console.log("BASE URL EditServiceScreen:", BASE_URL);
+console.log("BASE URL NewServiceScreen:", BASE_URL);
 
 
-const EditServiceScreen = ({ navigation, route }) => {
+const NewServiceScreen = ({ navigation, route }) => {
   const [servicesList, setServicesList] = useState([]);
   const [service, setService] = useState('');
   const [unit, setUnit] = useState('Lần');
@@ -22,6 +21,9 @@ const EditServiceScreen = ({ navigation, route }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const total = Number(quantity) * Number(price);
+  const { maintenance_id } = route.params;
+  console.log('Maintenance ID:', maintenance_id);
+
 
   useEffect(() => {
     fetchServices();
@@ -29,11 +31,11 @@ const EditServiceScreen = ({ navigation, route }) => {
 
   const fetchServices = async () => {
     try {
-        const token = await AsyncStorage.getItem('token');
-        console.log('token in edit:', token);
+      const token = await AsyncStorage.getItem('token');
+      console.log('token in edit:', token);
       const response = await axios.get(`${BASE_URL}/services/get`, {
-        headers:{
-            Authorization: `Bearer ${token}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
       });
       setServicesList(response.data);
@@ -50,21 +52,22 @@ const EditServiceScreen = ({ navigation, route }) => {
       Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin.');
       return;
     }
+
     setIsSubmitting(true);
     try {
-        const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem('token');
       const payload = {
+        maintenance_id: maintenance_id,
         service_name: service,
         unit,
         quantity: Number(quantity),
         unit_price: Number(price),
         notes: note,
-        // total_price is calculated on the backend or via generated column
       };
 
-      await axios.post(`${BASE_URL}/services/update`, payload, {
-        headers:{
-            Authorization: `Bearer ${token}`,
+      await axios.post(`${BASE_URL}/services/create`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
       });
       Alert.alert('Thành công', 'Dịch vụ đã được lưu');
@@ -88,7 +91,6 @@ const EditServiceScreen = ({ navigation, route }) => {
       </View>
 
       <ScrollView contentContainerStyle={styles.form}>
-        {/* Dịch vụ */}
         <Text style={styles.label}>Dịch vụ<Text style={{ color: 'red' }}> *</Text></Text>
         <View style={styles.inputWrapper}>
           <Picker
@@ -102,7 +104,6 @@ const EditServiceScreen = ({ navigation, route }) => {
           </Picker>
         </View>
 
-        {/* Đơn vị */}
         <Text style={styles.label}>Đơn vị</Text>
         <View style={styles.inputWrapper}>
           <Picker
@@ -118,7 +119,6 @@ const EditServiceScreen = ({ navigation, route }) => {
           </Picker>
         </View>
 
-        {/* Số lượng & Đơn giá */}
         <View style={styles.row}>
           <View style={styles.halfInput}>
             <Text style={styles.label}>Số lượng</Text>
@@ -143,7 +143,7 @@ const EditServiceScreen = ({ navigation, route }) => {
           </View>
         </View>
 
-        {/* Thành tiền */}
+       
         <Text style={styles.label}>Thành tiền</Text>
         <TextInput
           style={styles.textInput}
@@ -151,7 +151,7 @@ const EditServiceScreen = ({ navigation, route }) => {
           value={`${total.toLocaleString()} đ`}
         />
 
-        {/* Ghi chú */}
+        
         <Text style={styles.label}>Ghi chú</Text>
         <TextInput
           style={[styles.textInput, { height: 100, textAlignVertical: 'top' }]}
@@ -162,7 +162,7 @@ const EditServiceScreen = ({ navigation, route }) => {
         />
       </ScrollView>
 
-      {/* Nút Lưu */}
+     
       <TouchableOpacity
         style={[styles.saveButton, isSubmitting && { backgroundColor: '#aaa' }]}
         onPress={handleSave}
@@ -174,7 +174,7 @@ const EditServiceScreen = ({ navigation, route }) => {
   );
 };
 
-export default EditServiceScreen;
+export default NewServiceScreen;
 
 const styles = StyleSheet.create({
   container: {
