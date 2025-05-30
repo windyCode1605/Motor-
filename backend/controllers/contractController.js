@@ -1,68 +1,112 @@
-const promiseDb = require('../config/promiseDb');
+const db = require('../config/db');
 
-
+// Lấy tất cả hợp đồng
 exports.getAllContracts = async (req, res) => {
     try {
-        const [results] = await promiseDb.query('SELECT * FROM rental');
-        res.json(results);
+        const [contracts] = await db.execute(`
+            SELECT 
+                r.rental_id,
+                r.start_date,
+                r.end_date,
+                r.total_price,
+                r.payment_status,
+                r.status,
+                CONCAT(c.first_name, ' ', c.last_name) as fullName,
+                car.brand,
+                car.model,
+                car.license_plate
+            FROM rental r
+            JOIN customers c ON r.customer_id = c.customer_id
+            JOIN car ON r.car_id = car.car_id
+            ORDER BY r.created_at DESC
+        `);
+
+        res.json(contracts);
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách hợp đồng:', error);
+        res.status(500).json({ message: 'Lỗi server' });
     }
-    catch(err) {
-        console.error(err);
-        res.status(500).send('Lỗi truy vấn dữ liệu.');
-    }
-}
-exports.getContractById = async (req, res) => {
-    const { id } = req.params;
+};
+
+// Lấy chi tiết hợp đồng
+exports.getContractDetails = async (req, res) => {
     try {
-        const [results] = await promiseDb.query('SELECT * FROM rental WHERE rental_id = ?', [id]);
-        if (results.length === 0) {
-            return res.status(404).send('Không tìm thấy hợp đồng.');
+        const { id } = req.params;
+
+        const [contract] = await db.execute(`
+            SELECT 
+                r.*,
+                CONCAT(c.first_name, ' ', c.last_name) as fullName,
+                c.phone_number,
+                c.email,
+                car.brand,
+                car.model,
+                car.license_plate,
+                car.color
+            FROM rental r
+            JOIN customers c ON r.customer_id = c.customer_id
+            JOIN car ON r.car_id = car.car_id
+            WHERE r.rental_id = ?
+        `, [id]);
+
+        if (contract.length === 0) {
+            return res.status(404).json({ message: 'Không tìm thấy hợp đồng' });
         }
-        res.json(results[0]);
+
+        const [addons] = await db.execute(`
+            SELECT * FROM rental_addons 
+            WHERE rental_id = ?
+        `, [id]);
+
+        res.json({
+            ...contract[0],
+            addons
+        });
+
+    } catch (error) {
+        console.error('Lỗi khi lấy chi tiết hợp đồng:', error);
+        res.status(500).json({ message: 'Lỗi server' });
     }
-    catch(err) {
-        console.error(err);
-        res.status(500).send('Lỗi truy vấn dữ liệu.');
-    }
-}
-exports.createContract = async (req, res) => {
-    const { customer_id, vehicle_id, rental_date, return_date, total_price } = req.body;
-    try {
-        const [results] = await promiseDb.query('INSERT INTO rental (customer_id, vehicle_id, rental_date, return_date, total_price) VALUES (?, ?, ?, ?, ?)', [customer_id, vehicle_id, rental_date, return_date, total_price]);
-        res.status(201).json({ id: results.insertId });
-    }
-    catch(err) {
-        console.error(err);
-        res.status(500).send('Lỗi truy vấn dữ liệu.');
-    }
-}
+};
+
+
 exports.updateContract = async (req, res) => {
-    const { id } = req.params;
-    const { customer_id, vehicle_id, rental_date, return_date, total_price } = req.body;
-    try {
-        const [results] = await promiseDb.query('UPDATE rental SET customer_id = ?, vehicle_id = ?, rental_date = ?, return_date = ?, total_price = ? WHERE rental_id = ?', [customer_id, vehicle_id, rental_date, return_date, total_price, id]);
-        if (results.affectedRows === 0) {
-            return res.status(404).send('Không tìm thấy hợp đồng.');
-        }
-        res.json({ message: 'Hợp đồng đã được cập nhật.' });
+  const { id } = req.params;
+  const { status, payment_status } = req.body;
+
+  try {
+    const [exist] = await db.execute('SELECT * FROM rental WHERE rental_id = ?', [id]);
+    if (exist.length === 0) {
+      return res.status(404).json({ message: 'Không tìm thấy hợp đồng' });
     }
-    catch(err) {
-        console.error(err);
-        res.status(500).send('Lỗi truy vấn dữ liệu.');
-    }
-}
+
+    await db.execute(
+      `UPDATE rental SET status = ?, payment_status = ?, updated_at = NOW() WHERE rental_id = ?`,
+      [status, payment_status, id]
+    );
+
+    res.json({ message: 'Cập nhật hợp đồng thành công' });
+  } catch (error) {
+    console.error('Lỗi cập nhật hợp đồng:', error);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+};
+
 
 exports.deleteContract = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const [results] = await promiseDb.query('DELETE FROM rental WHERE rental_id = ?', [id]);
-        if (results.affectedRows === 0) {
-            return res.status(404).send('Không tìm thấy hợp đồng.');
-        }
-        res.json({ message: 'Hợp đồng đã được xóa.' });
+  const { id } = req.params;
+
+  try {
+    const [exist] = await db.execute('SELECT * FROM rental WHERE rental_id = ?', [id]);
+    if (exist.length === 0) {
+      return res.status(404).json({ message: 'Không tìm thấy hợp đồng' });
     }
-    catch(err) {
-        console.error(err);
-        res.status(500).send('Lỗi truy vấn dữ liệu.');
-    }
-}
+
+    await db.execute('DELETE FROM rental WHERE rental_id = ?', [id]);
+
+    res.json({ message: 'Xóa hợp đồng thành công' });
+  } catch (error) {
+    console.error('Lỗi xóa hợp đồng:', error);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+};

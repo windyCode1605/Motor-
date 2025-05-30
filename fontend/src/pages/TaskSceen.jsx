@@ -1,4 +1,4 @@
-import React , { useState} from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Modal from "react-native-modal";
@@ -28,8 +28,11 @@ const TaskScreen = ({ navigation }) => {
   return (
     <>
       <ScrollView contentContainerStyle={styles.container}>
-        <TouchableOpacity style={[styles.option, { margin: 10, borderRadius: 50, borderTopColor: "#ddd", borderTopWidth: 1, height: 70, }]}>
-          <Text style={{ color: 'blue' }}><Icon name='map-marker-outline' size={24} style={{ color: 'blue' }} /> Hội sở</Text>
+        <TouchableOpacity style={[styles.option, { margin: 10, borderRadius: 50, borderTopColor: "#ddd", borderTopWidth: 1, height: 70 }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Icon name='map-marker-outline' size={24} color="blue" />
+            <Text style={{ color: 'blue', marginLeft: 5 }}>Hội sở</Text>
+          </View>
           <Icon name="chevron-down" size={30} color={"#999"} />
         </TouchableOpacity>
 
@@ -95,9 +98,7 @@ const TaskScreen = ({ navigation }) => {
         <TouchableOpacity style={styles.option}>
           <Text><Icon name='office-building' size={24} color={'blue'} /> Chi nhánh</Text>
           <Icon name="chevron-right" size={30} color={"#999"} />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.option}>
+        </TouchableOpacity>        <TouchableOpacity style={styles.option} onPress={() => navigation.navigate('ListEmployee')}>
           <Text><Icon name='account-group' size={24} color={'blue'} /> Nhân viên và vai trò</Text>
           <Icon name="chevron-right" size={30} color={"#999"} />
         </TouchableOpacity>
